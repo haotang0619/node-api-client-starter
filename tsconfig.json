@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "node",
+    "target": "es2018",
+    "declaration": true,
+    "outDir": "./dist/esm",
+    "resolveJsonModule": true,
+    "removeComments": false
+  },
+  "include": ["src/**/*.ts", "**/.eslintrc.js"]
+}
