@@ -1,30 +1,36 @@
-# Usage
+# Extending this starter
 
-## Quick start
+This file is for whoever is extending this starter into a real client — it
+explains _why_ it's built the way it is and the patterns for adding
+resources. It is **not** shipped in the published package (see `files` in
+`package.json`) and isn't meant for end users of whatever client you build
+on top of this. Once you've added real resources, write a new README for
+_your_ client's users — see the "Extending this starter" note in `README.md`.
 
-```ts
-import { ApiClient } from 'node-api-client-starter';
+## Design philosophy
 
-const client = new ApiClient({ baseURL: 'https://api.example.com' });
+The goal is: **wrap every call to a REST endpoint as a typed function call**,
+so consumers of the finished client never construct a URL path by hand.
 
-// `caller` is a default CallerResource scoped at the client's baseURL.
-await client.caller.list();
-await client.caller.retrieve(1);
-await client.caller.create({ title: 'foo' });
-```
+- `BaseResource` owns one axios instance scoped to a `baseURL` (+ an optional
+  sub-`path`) and exposes protected `get/post/put/patch/delete` helpers that
+  already carry auth headers. It's the extension point — subclass it when you
+  need custom, non-CRUD methods.
+- `CallerResource` is the ready-made generic resource: it turns those verbs
+  into `list/retrieve/create/replace/modify/remove`, matching standard REST
+  CRUD (collection GET/POST, item GET/PUT/PATCH/DELETE by id). Use it as-is
+  for any endpoint that fits plain CRUD, or extend it to add a few extra
+  actions on top (see below).
+- `ApiClient` holds the top-level connection config (`baseURL`, `auth`) and
+  exposes a `resource()` factory so a subclass can mount additional resources
+  under sub-paths without repeating `baseURL`/`auth` wiring. `config` is
+  private on `ApiClient` on purpose — `resource()` is the only sanctioned way
+  a subclass touches it, so subclasses can't reach into or mutate the raw
+  connection config directly.
 
-`list/retrieve/create/replace/modify/remove` map to GET(collection)/GET(id)/POST/PUT/PATCH/DELETE.
-
-## Auth
-
-`ApiClientConfig.auth` is optional and one of three shapes; omit it for no
-`Authorization` header at all.
-
-```ts
-new ApiClient({ baseURL, auth: { type: 'bearer', token: 'xxx' } }); // Authorization: Bearer xxx
-new ApiClient({ baseURL, auth: { type: 'basic', token: 'base64…' } }); // Authorization: Basic base64…
-new ApiClient({ baseURL, auth: { type: 'header', name: 'X-Api-Key', value: 'xxx' } }); // X-Api-Key: xxx
-```
+This supports building an SDK-style client either as flat, custom-named
+methods (`client.createSomething(...)`) or as nested namespaces
+(`client.something.create(...)`) — see "Flat vs. nested method names" below.
 
 ## Mounting a resource at a sub-path
 

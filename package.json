@@ -11,8 +11,7 @@
   "files": [
     "dist",
     "CHANGELOG.md",
-    "README.md",
-    "USAGE.md"
+    "README.md"
   ],
   "scripts": {
     "prepare": "husky",
