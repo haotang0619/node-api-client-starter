@@ -91,6 +91,53 @@ class MyApiClient extends ApiClient {
 For anything even a custom resource doesn't cover, every resource also
 exposes `.instance`, the raw configured axios instance, as an escape hatch.
 
+You can also extend `CallerResource` instead of `BaseResource` when a
+resource is _mostly_ CRUD but needs one or two extra actions on top (e.g. a
+state-change endpoint like `POST /orders/:id/cancel`):
+
+```ts
+class OrderResource extends CallerResource {
+  cancel<T>(id: number | string) {
+    return this.post<T>(`/${id}/cancel`);
+  }
+}
+
+class MyApiClient extends ApiClient {
+  public orders = this.resource(OrderResource, 'orders');
+}
+
+await client.orders.create({ item: 'foo' }); // inherited from CallerResource
+await client.orders.cancel(1); // the extra action
+```
+
+## Flat vs. nested method names
+
+`resource()` doesn't force a nested shape. Whether a resource ends up as
+`client.orders.create(...)` or a flat `client.createOrder(...)` is just a
+matter of whether you expose the resource as a public field or keep it
+private and delegate to it from a named method:
+
+```ts
+class MyApiClient extends ApiClient {
+  private orders = this.resource(OrderResource, 'orders'); // not public, so no client.orders.*
+
+  createOrder<T>(body: unknown) {
+    return this.orders.create<T>(body);
+  }
+
+  cancelOrder<T>(id: number | string) {
+    return this.orders.cancel<T>(id);
+  }
+}
+
+await client.createOrder({ item: 'foo' });
+await client.cancelOrder(1);
+```
+
+Mix both freely in the same client — expose some resources as nested
+properties, wrap others in flat, custom-named methods — whichever reads
+better for the API you're modeling.
+
 ## Testing
 
 `axios` is auto-mocked with `jest.mock('axios')`; `axios.create` is stubbed
