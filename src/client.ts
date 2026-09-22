@@ -1,17 +1,27 @@
+import { BaseResource } from './base';
 import { CallerResource } from './caller';
 
-export type ApiClientConfig = { baseURL: string };
+export type ApiClientConfig = { auth?: AuthConfig; baseURL: string };
 
 export type ApiResponse<T = any> = { data: T; message: string; success: boolean };
+
+export type AuthConfig =
+  | { name: string; type: 'header'; value: string }
+  | { token: string; type: 'basic' }
+  | { token: string; type: 'bearer' };
 
 export class ApiClient {
   public caller: CallerResource;
 
-  constructor({ baseURL }: ApiClientConfig) {
-    this.caller = new CallerResource({ baseURL });
+  constructor(private readonly config: ApiClientConfig) {
+    this.caller = new CallerResource(config);
   }
 
-  private getBaseUrl(url: string, path: string) {
-    return `${url}/${path}`;
+  // Mounts a BaseResource subclass scoped under this client's baseURL + path, inheriting auth.
+  protected resource<T extends BaseResource>(
+    Resource: new (config: ApiClientConfig, path?: string) => T,
+    path: string,
+  ): T {
+    return new Resource(this.config, path);
   }
 }
