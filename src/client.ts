@@ -3,6 +3,7 @@ import { CallerResource } from './caller';
 
 export type ApiClientConfig = { auth?: AuthConfig; baseURL: string };
 
+// `any` default so ApiResponse can be used as a plain envelope type before the payload shape is known.
 export type ApiResponse<T = any> = { data: T; message: string; success: boolean };
 
 export type AuthConfig =
