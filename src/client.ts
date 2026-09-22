@@ -2,8 +2,6 @@ import { CallerResource } from './caller';
 
 export type ApiClientConfig = { baseURL: string };
 
-export type ResourceConfig = Partial<ApiClientConfig>;
-
 export type ApiResponse<T = any> = { data: T; message: string; success: boolean };
 
 export class ApiClient {

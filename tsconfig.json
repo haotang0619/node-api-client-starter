@@ -2,11 +2,13 @@
   "compilerOptions": {
     "module": "esnext",
     "moduleResolution": "node",
+    "ignoreDeprecations": "6.0",
     "target": "es2018",
     "declaration": true,
     "outDir": "./dist/esm",
+    "rootDir": "./src",
     "resolveJsonModule": true,
     "removeComments": false
   },
-  "include": ["src/**/*.ts", "**/.eslintrc.js"]
+  "include": ["src/**/*.ts"]
 }

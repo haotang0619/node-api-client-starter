@@ -1,13 +1,14 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 
-import { ResourceConfig } from './client';
+import { ApiClientConfig } from './client';
 
 export class BaseResource {
   protected INSTANCE: AxiosInstance;
 
-  constructor(config: ResourceConfig) {
+  constructor(config: ApiClientConfig) {
     const { baseURL } = config;
-    if (!!baseURL) this.INSTANCE = axios.create({ baseURL });
+    if (!baseURL) throw new Error('BaseResource requires a baseURL');
+    this.INSTANCE = axios.create({ baseURL });
   }
 
   protected async getRequestConfig(config?: AxiosRequestConfig): Promise<AxiosRequestConfig> {
